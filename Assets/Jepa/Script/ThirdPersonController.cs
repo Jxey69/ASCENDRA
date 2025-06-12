@@ -4,38 +4,53 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class ThirdPersonController : MonoBehaviour
 {
-    [SerializeField] private float walkSpeed = 3f;
-    [SerializeField] private float sprintSpeed = 6f;
-    [SerializeField] private float jumpForce = 5f;
-    [SerializeField] private float climbSpeed = 2f;
+    [Header("Movement")]
+    [SerializeField] private float walkSpeed = 4f;
+    [SerializeField] private float runSpeed = 8f;
+    [SerializeField] private float jumpForce = 6f;
+
+    [Header("Climbing")]
+    [SerializeField] private float mantleDuration = 0.4f;
+    [SerializeField] private float ledgeCheckDistance = 0.6f;
+    [SerializeField] private float ledgeCheckHeight = 1.2f;
+    [SerializeField] private float ledgeGrabHeight = 1.5f;
+    [SerializeField] private LayerMask climbableMask;
+    [SerializeField] private Animator animator;
+
+    [Header("References")]
     [SerializeField] private Transform orientation;
     [SerializeField] private Transform cameraTransform;
-    [SerializeField] private LayerMask groundMask;
-    [SerializeField] private LayerMask climbableMask;
 
     private Rigidbody rb;
-    private PlayerInput input;
+    private PlayerControls inputActions;
     private Vector2 moveInput;
-    private bool isSprinting;
-    private bool isClimbing;
-    private bool requestJump;
+    private bool runInput;
+    private bool jumpInput;
+    private bool isGrounded;
+    private bool isMantling;
+    private Vector3 mantleTarget;
+    private float mantleTimer;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
 
-        input = new PlayerInput();
+        inputActions = new PlayerControls();
+        inputActions.PlayerLocomotionMap.Movement.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
+        inputActions.PlayerLocomotionMap.Movement.canceled += _ => moveInput = Vector2.zero;
+        inputActions.PlayerLocomotionMap.Run.performed += _ => runInput = true;
+        inputActions.PlayerLocomotionMap.Run.canceled += _ => runInput = false;
+        inputActions.PlayerLocomotionMap.Jump.performed += _ => jumpInput = true;
+        inputActions.Enable();
 
-        input.Player.Move.performed += ctx => moveInput = ctx.ReadValue<Vector2>();
-        input.Player.Move.canceled += _ => moveInput = Vector2.zero;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
 
-        input.Player.Sprint.performed += _ => isSprinting = true;
-        input.Player.Sprint.canceled += _ => isSprinting = false;
-
-        input.Player.Jump.performed += _ => requestJump = true;
-
-        input.Player.Enable();
+    private void OnDestroy()
+    {
+        inputActions.Disable();
     }
 
     private void Update()
@@ -43,102 +58,96 @@ public class ThirdPersonController : MonoBehaviour
         Vector3 forward = cameraTransform.forward;
         forward.y = 0f;
         orientation.forward = forward.normalized;
+
+        isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f, ~0, QueryTriggerInteraction.Ignore);
+
+        if (animator)
+        {
+            animator.SetBool("isGrounded", isGrounded);
+
+            bool isMoving = moveInput.magnitude > 0.1f;
+            bool isLeft = moveInput.x < -0.1f;
+            bool isRight = moveInput.x > 0.1f;
+
+            animator.SetBool("isWalking", isMoving && !runInput && isGrounded && !isMantling);
+            animator.SetBool("isRunning", isMoving && runInput && isGrounded && !isMantling);
+            animator.SetBool("isWalkLeft", isLeft && !runInput && isGrounded && !isMantling);
+            animator.SetBool("isWalkRight", isRight && !runInput && isGrounded && !isMantling);
+            animator.SetBool("isRunLeft", isLeft && runInput && isGrounded && !isMantling);
+            animator.SetBool("isRunRight", isRight && runInput && isGrounded && !isMantling);
+        }
     }
 
     private void FixedUpdate()
     {
-        if (isClimbing)
+        if (isMantling)
         {
-            Climb();
+            MantleLerp();
+            return;
         }
-        else
-        {
-            Move();
 
-            if (requestJump && IsGrounded())
+        Vector3 moveDir = orientation.forward * moveInput.y + orientation.right * moveInput.x;
+        float speed = runInput ? runSpeed : walkSpeed;
+        Vector3 velocity = moveDir.normalized * speed;
+        rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
+
+        Vector3 lookDir = orientation.forward;
+        lookDir.y = 0f;
+        if (lookDir.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDir), 0.2f);
+
+        if (jumpInput)
+        {
+            if (isGrounded)
             {
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+                if (animator) animator.SetTrigger("isJumping");
             }
-            else if (requestJump && !IsGrounded() && CanClimb())
+            else if (CheckForLedge(out Vector3 ledgePos))
             {
-                isClimbing = true;
-                rb.useGravity = false;
+                StartMantle(ledgePos);
             }
+            jumpInput = false;
         }
-
-        requestJump = false;
     }
 
-    private void Move()
+    private bool CheckForLedge(out Vector3 ledgePos)
     {
-        Vector3 direction = orientation.forward * moveInput.y + orientation.right * moveInput.x;
-        float speed = isSprinting ? sprintSpeed : walkSpeed;
-
-        if (direction.sqrMagnitude > 0.01f)
+        Vector3 origin = transform.position + Vector3.up * ledgeCheckHeight;
+        Vector3 dir = orientation.forward;
+        if (Physics.Raycast(origin, dir, out RaycastHit wallHit, ledgeCheckDistance, climbableMask))
         {
-            // Perform a short sweep in movement direction
-            RaycastHit hit;
-            Vector3 movement = direction.normalized;
-            if (Physics.Raycast(transform.position, movement, out hit, 0.6f, groundMask))
+            Vector3 topOrigin = wallHit.point + Vector3.up * ledgeGrabHeight;
+            if (Physics.Raycast(topOrigin, Vector3.down, out RaycastHit topHit, ledgeGrabHeight + 0.1f, climbableMask))
             {
-                // Slide along the wall
-                Vector3 wallNormal = hit.normal;
-                movement = Vector3.ProjectOnPlane(movement, wallNormal).normalized;
+                ledgePos = topHit.point + Vector3.up * 0.5f;
+                return true;
             }
-
-            Vector3 velocity = movement * speed;
-
-            Quaternion targetRotation = Quaternion.LookRotation(movement);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * 10f);
-
-            rb.linearVelocity = new Vector3(velocity.x, rb.linearVelocity.y, velocity.z);
         }
-        else
+        ledgePos = Vector3.zero;
+        return false;
+    }
+
+    private void StartMantle(Vector3 targetPos)
+    {
+        isMantling = true;
+        mantleTarget = targetPos;
+        mantleTimer = 0f;
+        rb.isKinematic = true;
+        if (animator) animator.SetBool("isClimbing", true);
+    }
+
+    private void MantleLerp()
+    {
+        mantleTimer += Time.fixedDeltaTime;
+        float t = Mathf.Clamp01(mantleTimer / mantleDuration);
+        transform.position = Vector3.Lerp(transform.position, mantleTarget, t);
+
+        if (t >= 1f)
         {
-            rb.linearVelocity = new Vector3(0f, rb.linearVelocity.y, 0f);
+            isMantling = false;
+            rb.isKinematic = false;
+            if (animator) animator.SetBool("isClimbing", false);
         }
     }
-
-
-    private void Climb()
-    {
-        Vector3 climbDirection = orientation.up * moveInput.y + orientation.right * moveInput.x;
-        rb.linearVelocity = climbDirection * climbSpeed;
-    }
-
-    private bool IsGrounded()
-    {
-        float radius = 0.3f;
-        float height = 1.0f;
-        Vector3 center = transform.position + Vector3.up * 0.5f;
-        return Physics.CheckCapsule(center + Vector3.up * (height * 0.5f - radius), center - Vector3.up * (height * 0.5f - radius), radius, groundMask);
-    }
-
-    private bool CanClimb()
-    {
-        return Physics.CheckSphere(transform.position, 0.5f, climbableMask);
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (((1 << other.gameObject.layer) & climbableMask) != 0)
-        {
-            isClimbing = false;
-            rb.useGravity = true;
-        }
-    }
-
-#if UNITY_EDITOR
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        float radius = 0.3f;
-        float height = 1.0f;
-        Vector3 center = transform.position + Vector3.up * 0.5f;
-        Vector3 top = center + Vector3.up * (height * 0.5f - radius);
-        Vector3 bottom = center - Vector3.up * (height * 0.5f - radius);
-        Gizmos.DrawWireSphere(top, radius);
-        Gizmos.DrawWireSphere(bottom, radius);
-    }
-#endif
 }
