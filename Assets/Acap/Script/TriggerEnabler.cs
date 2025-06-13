@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class TriggerEnabler : MonoBehaviour
 {
-    [SerializeField] private Temp targetScript;
+    [SerializeField] private ThrowTrigger targetScript;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -11,7 +11,7 @@ public class TriggerEnabler : MonoBehaviour
         if (targetScript != null && !targetScript.enabled)
         {
             targetScript.enabled = true;
-            Debug.Log("Enabled Temp script.");
+            Debug.Log("Enabled Throw script.");
 
             var notifier = FindAnyObjectByType<UIThrowNotifier>();
             notifier?.ShowTempActivated();
