@@ -2,7 +2,7 @@ using TMPro;
 using UnityEngine;
 using System.Collections;
 
-public class UIThrowNotifier : MonoBehaviour
+public class UIRopeNotifier : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI tempText;
     [SerializeField] private float displayDuration = 2f;
@@ -16,18 +16,15 @@ public class UIThrowNotifier : MonoBehaviour
     private IEnumerator ShowTextCoroutine()
     {
         tempText.gameObject.SetActive(true);
-        tempText.text = "You can now Left Click to throw teleportation ball!";
+
+        tempText.text = "Press E when near the Red anchor ball \nto swing";
         yield return new WaitForSeconds(3f);
 
-        tempText.text = "Press T to Teleport \nPress Y to Cancel";
-        yield return new WaitForSeconds(2f);
+        tempText.text = "Press E again to let go";
+        yield return new WaitForSeconds(3f);
 
-        tempText.text = "Hold T to charge your throw";
-        yield return new WaitForSeconds(2f);
+        tempText.text = "You can combo with the teleportation ball \nto get closer to the anchor";
+        yield return new WaitForSeconds(3f);
         tempText.gameObject.SetActive(false);
-
-        var notifier = FindAnyObjectByType<UIRopeNotifier>();
-        notifier?.ShowTempActivated();
     }
-
 }

@@ -17,6 +17,7 @@ public class TriggerEnabler : MonoBehaviour
             notifier?.ShowTempActivated();
         }
 
+
         Destroy(gameObject);
     }
 }
