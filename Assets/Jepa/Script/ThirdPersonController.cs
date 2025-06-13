@@ -8,6 +8,9 @@ public class ThirdPersonController : MonoBehaviour
     [SerializeField] private float walkSpeed = 4f;
     [SerializeField] private float runSpeed = 8f;
     [SerializeField] private float jumpForce = 6f;
+    [SerializeField] private float groundCheckRadius = 0.3f;
+    [SerializeField] private float groundCheckOffset = 0.5f;
+    [SerializeField] private LayerMask groundMask; // Set this to your platform layers
 
     [Header("Climbing")]
     [SerializeField] private float mantleDuration = 0.4f;
@@ -59,7 +62,8 @@ public class ThirdPersonController : MonoBehaviour
         forward.y = 0f;
         orientation.forward = forward.normalized;
 
-        isGrounded = Physics.Raycast(transform.position, Vector3.down, 1.1f, ~0, QueryTriggerInteraction.Ignore);
+        Vector3 groundCheckPos = transform.position + Vector3.down * groundCheckOffset;
+        isGrounded = Physics.CheckSphere(groundCheckPos, groundCheckRadius, groundMask, QueryTriggerInteraction.Ignore);
 
         if (animator)
         {
