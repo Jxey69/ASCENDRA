@@ -25,6 +25,13 @@ public class UIRopeNotifier : MonoBehaviour
 
         tempText.text = "You can combo with the teleportation ball \nto get closer to the anchor";
         yield return new WaitForSeconds(3f);
+
+        tempText.text = "When falls, Fairy will try to help you \nby making a platform for you to stand for 10 seconds";
+        yield return new WaitForSeconds(3f);
+
+        tempText.text = "Use the time to throw your Kunai and get back.";
+        yield return new WaitForSeconds(2f);
+
         tempText.gameObject.SetActive(false);
     }
 }

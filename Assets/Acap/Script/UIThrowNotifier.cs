@@ -16,7 +16,7 @@ public class UIThrowNotifier : MonoBehaviour
     private IEnumerator ShowTextCoroutine()
     {
         tempText.gameObject.SetActive(true);
-        tempText.text = "You can now Left Click to throw teleportation ball!";
+        tempText.text = "You can now Left Click to throw teleportation Kunai!";
         yield return new WaitForSeconds(3f);
 
         tempText.text = "Press T to Teleport \nPress Y to Cancel";
