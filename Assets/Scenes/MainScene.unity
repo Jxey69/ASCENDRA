@@ -140779,6 +140779,8 @@ MonoBehaviour:
   playerLocomotion: {fileID: 1220569125}
   playerSwing: {fileID: 1972454272}
   isSwing: 0
+  hookSound: {fileID: 8300000, guid: 032e1addf4e03de4b9c3549dbb3aa8ac, type: 3}
+  audioSource: {fileID: 950640678}
 --- !u!4 &950640677
 Transform:
   m_ObjectHideFlags: 0
@@ -140804,8 +140806,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: 5bfde168a8c142f4da903947e735aaab, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 032e1addf4e03de4b9c3549dbb3aa8ac, type: 3}
+  m_Resource: {fileID: 8300000, guid: 032e1addf4e03de4b9c3549dbb3aa8ac, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.142
   m_Pitch: 1
@@ -180570,6 +180572,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bounceMultiplier: 11
   minimumBounceForce: 11
+  bounceSound: {fileID: 8300000, guid: 493a0a2328548524a88906f61fbe0969, type: 3}
+  audioSource: {fileID: 1220569135}
 --- !u!114 &1220569132
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -180601,6 +180605,8 @@ MonoBehaviour:
   maxThrowForce: 4000
   maxChargeTime: 2
   teleportYOffset: 1
+  throwSound: {fileID: 8300000, guid: 974628c25ebab8140935b5d01ec35723, type: 3}
+  audioSource: {fileID: 1220569135}
 --- !u!82 &1220569135
 AudioSource:
   m_ObjectHideFlags: 0
@@ -180611,10 +180617,10 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: ed53bf92d0edb744b8cddf153f6ada6e, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 493a0a2328548524a88906f61fbe0969, type: 3}
+  m_Resource: {fileID: 8300000, guid: 493a0a2328548524a88906f61fbe0969, type: 3}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -180708,8 +180714,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 8300000, guid: c058f85eadc8af14f9a7ae8c19907545, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 974628c25ebab8140935b5d01ec35723, type: 3}
+  m_Resource: {fileID: 8300000, guid: 974628c25ebab8140935b5d01ec35723, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.099
   m_Pitch: 1

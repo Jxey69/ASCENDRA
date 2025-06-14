@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class ThrowTrigger : MonoBehaviour
 {
@@ -12,6 +13,9 @@ public class ThrowTrigger : MonoBehaviour
     public float maxThrowForce = 2000f;
     public float maxChargeTime = 2f;
     public float teleportYOffset = 1f;
+
+    [SerializeField] private AudioClip throwSound;
+    [SerializeField] private AudioSource audioSource;
 
     private GameObject tpItem;
     private TeleportAnchor tpAnchor;
@@ -52,6 +56,11 @@ public class ThrowTrigger : MonoBehaviour
                 rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
                 Vector3 dir = playerCamera.transform.forward;
                 rb.AddForce(dir * throwForce, ForceMode.Force);
+            }
+
+            if (audioSource != null && throwSound != null)
+            {
+                audioSource.PlayOneShot(throwSound);
             }
 
             isCharging = false;

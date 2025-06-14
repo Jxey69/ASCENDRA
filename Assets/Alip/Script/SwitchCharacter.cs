@@ -4,6 +4,9 @@ public class SwitchCharacter : MonoBehaviour
 {
     public GameObject playerLocomotion, playerSwing;
     public bool isSwing = false;
+    [SerializeField] private AudioClip hookSound;
+    [SerializeField] private AudioSource audioSource;
+
     void Start()
     {
         playerLocomotion.SetActive(true);
@@ -15,6 +18,11 @@ public class SwitchCharacter : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E))
         {
+            if (audioSource != null && hookSound != null)
+            {
+                audioSource.PlayOneShot(hookSound);
+            }
+
             isSwing = !isSwing;
             if (isSwing)
             {
@@ -30,4 +38,5 @@ public class SwitchCharacter : MonoBehaviour
             }
         }
     }
+
 }
