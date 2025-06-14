@@ -13,10 +13,21 @@ public class ThrowTrigger : MonoBehaviour
     public float maxChargeTime = 2f;
     public float teleportYOffset = 1f;
 
+    [Header("Audio")]
+    public AudioClip throwSound;
+    private AudioSource audioSource;
+
     private GameObject tpItem;
     private TeleportAnchor tpAnchor;
     private float chargeTime;
     private bool isCharging;
+
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+        Debug.Log("AudioSource initialized: " + (audioSource != null));
+    }
 
     void Update()
     {
@@ -52,6 +63,11 @@ public class ThrowTrigger : MonoBehaviour
                 rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
                 Vector3 dir = playerCamera.transform.forward;
                 rb.AddForce(dir * throwForce, ForceMode.Force);
+            }
+
+            if (throwSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(throwSound);
             }
 
             isCharging = false;
