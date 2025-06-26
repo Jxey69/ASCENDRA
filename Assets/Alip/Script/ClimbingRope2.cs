@@ -1,6 +1,6 @@
-﻿using UnityEngine;
+using UnityEngine;
 
-public class ClimbingRope : MonoBehaviour
+public class ClimbingRope2 : MonoBehaviour
 {
     public Transform anchorPoint;
     public Transform swingingObject; // Assign itself
@@ -15,7 +15,7 @@ public class ClimbingRope : MonoBehaviour
         hinge.anchor = localAnchor;
 
         // Optional: Ensure Axis is set for side swing
-        hinge.axis = Vector3.right; // (1, 0, 0)
+        hinge.axis = Vector3.forward; // (0, 0, 1)
     }
 
     void Update()
