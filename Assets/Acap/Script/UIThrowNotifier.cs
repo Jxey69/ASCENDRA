@@ -16,13 +16,10 @@ public class UIThrowNotifier : MonoBehaviour
     private IEnumerator ShowTextCoroutine()
     {
         tempText.gameObject.SetActive(true);
-        tempText.text = "You can now Left Click to throw teleportation Kunai!";
+        tempText.text = "You can now Hold [Left Click] to charge throw teleportation Kunai!";
         yield return new WaitForSeconds(3f);
 
-        tempText.text = "Press T to Teleport \nPress Y to Cancel";
-        yield return new WaitForSeconds(2f);
-
-        tempText.text = "Hold T to charge your throw";
+        tempText.text = "Press [T] to Teleport \nPress [Y] to Cancel";
         yield return new WaitForSeconds(2f);
         tempText.gameObject.SetActive(false);
 

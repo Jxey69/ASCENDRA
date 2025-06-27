@@ -80,7 +80,7 @@ public class ThrowTrigger : MonoBehaviour
             Rigidbody rb = GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.velocity = Vector3.zero; // stop current motion
+                rb.linearVelocity = Vector3.zero; // stop current motion
                 rb.MovePosition(tpPos);     // teleport via physics
             }
             else

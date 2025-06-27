@@ -15,8 +15,11 @@ public class UIIntroManager : MonoBehaviour
 
     private IEnumerator ShowIntroSequence()
     {
-        introText.text = "WASD to move \nShift to run \nSpace to jump";
+        introText.text = "WASD to move \n[Shift] to run \n[Space] to jump";
         yield return new WaitForSeconds(3f); 
+
+        introText.text = "While on the bouncing pad, hold [SPACE] to charge";
+        yield return new WaitForSeconds(3f);
 
         introText.text = "You can control your movement in the air";
         yield return new WaitForSeconds(3f);
@@ -25,7 +28,7 @@ public class UIIntroManager : MonoBehaviour
         yield return new WaitForSeconds(3.5f);
 
         introText.text = "THE FLOOR IS LAVA";
-        yield return new WaitForSeconds(4f);
+        yield return new WaitForSeconds(3f);
 
         introText.gameObject.SetActive(false);
         goalText.text = "Reach the top";
