@@ -1,12 +1,11 @@
 using UnityEngine;
-using UnityEngine.Audio;
 
 public class ThrowTrigger : MonoBehaviour
 {
     [Header("References")]
-    public GameObject throwItem;        // Kunai prefab with TeleportAnchor
-    public Transform throwPoint;        // Throw origin
-    public Camera playerCamera;         // Used to aim
+    public GameObject throwItem;            // Kunai prefab with TeleportAnchor
+    public Transform throwPoint;            // Throw origin point
+    public Camera playerCamera;             // Aiming camera
 
     [Header("Throw Settings")]
     public float minThrowForce = 500f;
@@ -14,6 +13,7 @@ public class ThrowTrigger : MonoBehaviour
     public float maxChargeTime = 2f;
     public float teleportYOffset = 1f;
 
+    [Header("Audio")]
     [SerializeField] private AudioClip throwSound;
     [SerializeField] private AudioSource audioSource;
 
@@ -67,17 +67,39 @@ public class ThrowTrigger : MonoBehaviour
         }
     }
 
-    private void HandleTeleport()
+   private void HandleTeleport()
+{
+    if (Input.GetKeyDown(KeyCode.T) && tpItem != null && tpAnchor != null)
     {
-        if (Input.GetKeyDown(KeyCode.T) && tpItem != null && tpAnchor != null)
+        Vector3 tpPos = tpAnchor.CurrentPosition + Vector3.up * teleportYOffset;
+
+        Debug.Log($"Trying to teleport to: {tpPos}");
+
+        if (!Physics.CheckSphere(tpPos, 0.2f))
         {
-            Vector3 tpPos = tpAnchor.CurrentPosition + Vector3.up * teleportYOffset;
-            transform.position = tpPos;
+            Rigidbody rb = GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                rb.velocity = Vector3.zero; // stop current motion
+                rb.MovePosition(tpPos);     // teleport via physics
+            }
+            else
+            {
+                transform.position = tpPos; // fallback if no RB
+            }
+
+            Debug.Log("Teleport success!");
             Destroy(tpItem);
             tpItem = null;
             tpAnchor = null;
         }
+        else
+        {
+            Debug.LogWarning("Teleport blocked: space occupied.");
+        }
     }
+}
+
 
     private void HandleReset()
     {
